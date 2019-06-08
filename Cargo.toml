@@ -1,0 +1,16 @@
+[package]
+name = "async-log"
+version = "1.0.0"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/rustasync/async-log"
+documentation = "https://docs.rs/async-log"
+description = "Async tracing capabilities for the log crate."
+keywords = ["async", "log", "trace", "span", "macro"]
+categories = ["asynchronous", "command-line-utilities", "development-tools", "text-processing", "web-programming"]
+authors = ["Yoshua Wuyts <yoshuawuyts@gmail.com>"]
+readme = "README.md"
+edition = "2018"
+
+[dependencies]
+
+[dev-dependencies]
