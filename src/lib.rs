@@ -110,6 +110,9 @@ pub use logger::Logger;
 
 /// A new span created by [`span!`].
 ///
+/// An `trace!` is emitted when this struct is constructed. And another `trace!` is emitted when
+/// this struct is dropped.
+///
 /// [`span!`]: macro.span.html
 #[must_use]
 #[derive(Debug)]
