@@ -3,7 +3,7 @@ use log::{Log, Metadata, Record};
 
 // static ASYNC_LOGGER: AsyncLogger<L> = AsyncLogger;
 
-/// Wrap an async logger with context.
+/// Wrap an async logger, extending it with async functionality.
 #[derive(Debug)]
 pub struct AsyncLogger<L: Log, F>
 where
@@ -56,34 +56,38 @@ where
                         .lineno
                         .map(|l| format!(", line={}", l))
                         .unwrap_or_else(|| String::from(""));
+
                     let filename = symbol
                         .filename
                         .map(|f| format!(", filename={}", f.to_string_lossy()))
                         .unwrap_or_else(|| String::from(""));
+
                     (line, filename)
                 }
                 None => (String::from(""), String::from("")),
             };
 
-            // let args = format_args!(
-            //     "{}{}{}{}{}",
-            //     record.args(),
-            //     line,
-            //     filename,
-            //     task_id,
-            //     parent_id
-            // );
-            let wrapped_record = log::Record::builder()
-                .args(format_args!("hello world"))
-                .metadata(record.metadata().clone())
-                .level(record.level())
-                .target(record.target())
-                .module_path(record.module_path())
-                .file(record.file())
-                .line(record.line())
-                .build();
-
-            self.logger.log(&wrapped_record)
+            // This is done this way b/c `Record` + `format_args` needs to be built inline. See:
+            // https://stackoverflow.com/q/56304313/1541707
+            self.logger.log(
+                &log::Record::builder()
+                    .args(record.args().clone())
+                    .args(format_args!(
+                        "{}{}{}{}{}",
+                        record.args(),
+                        line,
+                        filename,
+                        task_id,
+                        parent_id
+                    ))
+                    .metadata(record.metadata().clone())
+                    .level(record.level())
+                    .target(record.target())
+                    .module_path(record.module_path())
+                    .file(record.file())
+                    .line(record.line())
+                    .build(),
+            )
         }
     }
     fn flush(&self) {}
