@@ -1,7 +1,7 @@
 use crate::backtrace::async_log_capture_caller;
 use log::{LevelFilter, Log, Metadata, Record};
 
-/// Wrap an async logger, extending it with async functionality.
+/// A Logger that wraps other loggers to extend it with async functionality.
 #[derive(Debug)]
 pub struct Logger<L: Log + 'static, F>
 where
