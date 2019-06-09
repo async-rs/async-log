@@ -106,7 +106,7 @@ mod backtrace;
 mod logger;
 mod macros;
 
-pub use logger::AsyncLogger;
+pub use logger::Logger;
 
 /// A new span created by [`span!`].
 ///

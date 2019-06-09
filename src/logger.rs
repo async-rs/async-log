@@ -3,7 +3,7 @@ use log::{LevelFilter, Log, Metadata, Record};
 
 /// Wrap an async logger, extending it with async functionality.
 #[derive(Debug)]
-pub struct AsyncLogger<L: Log + 'static, F>
+pub struct Logger<L: Log + 'static, F>
 where
     F: Fn() -> (u64, Option<u64>) + Send + Sync + 'static,
 {
@@ -13,7 +13,7 @@ where
     filter: LevelFilter,
 }
 
-impl<L: Log + 'static, F> AsyncLogger<L, F>
+impl<L: Log + 'static, F> Logger<L, F>
 where
     F: Fn() -> (u64, Option<u64>) + Send + Sync + 'static,
 {
@@ -44,7 +44,7 @@ where
     }
 }
 
-impl<L: Log, F> log::Log for AsyncLogger<L, F>
+impl<L: Log, F> log::Log for Logger<L, F>
 where
     F: Fn() -> (u64, Option<u64>) + Send + Sync + 'static,
 {
