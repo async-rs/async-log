@@ -1,32 +1,44 @@
 use crate::backtrace::async_log_capture_caller;
-use log::{Log, Metadata, Record};
-
-// static ASYNC_LOGGER: AsyncLogger<L> = AsyncLogger;
+use log::{LevelFilter, Log, Metadata, Record};
 
 /// Wrap an async logger, extending it with async functionality.
 #[derive(Debug)]
-pub struct AsyncLogger<L: Log, F>
+pub struct AsyncLogger<L: Log + 'static, F>
 where
     F: Fn() -> (u64, Option<u64>) + Send + Sync + 'static,
 {
     logger: L,
     with: F,
     depth: u8,
+    filter: LevelFilter,
 }
 
-impl<L: Log, F> AsyncLogger<L, F>
+impl<L: Log + 'static, F> AsyncLogger<L, F>
 where
     F: Fn() -> (u64, Option<u64>) + Send + Sync + 'static,
 {
     /// Wrap an existing logger, extending it with async functionality.
     pub fn wrap(logger: L, depth: u8, with: F) -> Self {
         Self {
+            filter: LevelFilter::Off,
             logger,
             depth,
             with,
         }
     }
 
+    /// Set the filter level
+    pub fn filter(mut self, filter: LevelFilter) -> Self {
+        self.filter = filter;
+        self
+    }
+
+    /// Start logging.
+    pub fn start(self) -> Result<(), log::SetLoggerError> {
+        log::set_boxed_logger(Box::new(self))
+    }
+
+    /// Call the `self.with` closure, and return its results.
     fn with(&self) -> (u64, Option<u64>) {
         (self.with)()
     }
