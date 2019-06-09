@@ -1,3 +1,6 @@
+use async_log::span;
+use log::info;
+
 fn setup_logger() {
     env_logger::Builder::new()
         .filter(None, log::Level::Trace.to_level_filter())
@@ -8,12 +11,12 @@ fn setup_logger() {
 fn main() {
     setup_logger();
 
-    async_log::span!("main", {
+    span!("main", {
         let x = "foo";
-        log::info!("this {}", x);
+        info!("this {}", x);
 
-        async_log::span!("inner", "x={}", x, {
-            log::info!("we must go deeper {}", x);
+        span!("inner, x={}", x, {
+            info!("we must go deeper {}", x);
         });
     })
 }

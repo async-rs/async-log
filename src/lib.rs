@@ -24,7 +24,7 @@
 //! to distinguish between the items for "a", and the items from "b"._
 //!
 //! ## How do we correlate messages?
-//! The goal of async logging is to determin which events happened in sequence inside your code. In
+//! The goal of async logging is to determine which events happened in sequence inside your code. In
 //! practice this means being able to correlate events with each other past _yield points_ (e.g.
 //! `.await`), and _thread bounds_.
 //!
@@ -44,6 +44,31 @@
 //! A span is a pair of messages. One is emitted at the start of an operation, and the other is
 //! emitted at the end of the operation. If we add timestamps to when each message was sent, we're
 //! able to determine how long operations take. Or determine which operations never finished.
+//!
+//! In `async-log` each span is annotated with a `span_mark` message:
+//! - `span_mark=start` marks the start of a span
+//! - `span_mark=end` marks the end of a span
+//!
+//! __example__
+//! ```txt
+//! runtime::fs::read_to_string, span_mark=start, path=/tmp/foob, task_id=7, parent_id=5, thread_id=8
+//! runtime::fs::read_to_string, span_mark=end, path=/tmp/foob, task_id=7, parent_id=5, thread_id=8
+//! ```
+//!
+//! ## Formatting
+//! Structured logging (key-value logging) is [currently in the
+//! process](https://github.com/rust-lang-nursery/log/issues/328) of being added to `log`.
+//!
+//! At the time of writing there are no published versions available with even the experimental
+//! features available. So until then we have to add key-value pairs using strings. Once key-value
+//! logging is added to `log` we'll publish a breaking change, and move over.
+//!
+//! The syntax we've chosen to use is `foo=bar` pairs. Multiple pairs should be delimited using
+//! commas (`,`). Every pair should come _after_ the first message. An example log looks like this:
+//!
+//! ```txt
+//! a new cat has logged on, name=nori, snacks=always
+//! ```
 //!
 //! ## Example
 //!
@@ -86,35 +111,24 @@ mod macros;
 #[must_use]
 #[derive(Debug)]
 pub struct Span {
-    name: String,
+    args: String,
 }
 
 impl Span {
     /// Create a new instance.
     ///
     /// You should generally prefer to call `span!` instead of constructing this manually.
-    pub fn new(name: impl AsRef<str>) -> Self {
-        let name = name.as_ref();
-        log::trace!("{}, span_mark=start", name);
+    pub fn new(args: impl AsRef<str>) -> Self {
+        let args = args.as_ref();
+        log::trace!("{}, span_mark=start", args);
         Self {
-            name: name.to_owned(),
-        }
-    }
-
-    /// Create a new instance with arguments.
-    ///
-    /// You should generally prefer to call `span!` instead of constructing this manually.
-    pub fn with_args(name: impl AsRef<str>, args: impl AsRef<str>) -> Self {
-        let name = name.as_ref();
-        log::trace!("{}, span_mark=start, {}", name, args.as_ref());
-        Self {
-            name: name.to_owned(),
+            args: args.to_owned(),
         }
     }
 }
 
 impl Drop for Span {
     fn drop(&mut self) {
-        log::trace!("{}, span_mark=end", self.name);
+        log::trace!("{}, span_mark=end", self.args);
     }
 }
