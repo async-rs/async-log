@@ -103,7 +103,10 @@
 #![cfg_attr(test, deny(warnings))]
 
 mod backtrace;
+mod logger;
 mod macros;
+
+pub use logger::AsyncLogger;
 
 /// A new span created by [`span!`].
 ///

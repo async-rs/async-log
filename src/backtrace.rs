@@ -1,9 +1,9 @@
 /// The return type of `async_log_capture_caller`
 #[derive(Debug)]
 pub(crate) struct Symbol {
-    name: Option<String>,
-    lineno: Option<u32>,
-    filename: Option<std::path::PathBuf>,
+    pub(crate) name: Option<String>,
+    pub(crate) lineno: Option<u32>,
+    pub(crate) filename: Option<std::path::PathBuf>,
 }
 
 /// Find the method that called this.
