@@ -1,15 +1,17 @@
 use crate::backtrace::async_log_capture_caller;
 use log::{LevelFilter, Log, Metadata, Record};
 
+use std::thread;
+
 /// A Logger that wraps other loggers to extend it with async functionality.
 #[derive(Debug)]
 pub struct Logger<L: Log + 'static, F>
 where
     F: Fn() -> (u64, Option<u64>) + Send + Sync + 'static,
 {
+    backtrace: bool,
     logger: L,
     with: F,
-    depth: u8,
 }
 
 impl<L: Log + 'static, F> Logger<L, F>
@@ -17,10 +19,13 @@ where
     F: Fn() -> (u64, Option<u64>) + Send + Sync + 'static,
 {
     /// Wrap an existing logger, extending it with async functionality.
-    pub fn wrap(logger: L, depth: u8, with: F) -> Self {
+    pub fn wrap(logger: L, with: F) -> Self {
+        let backtrace = std::env::var_os("RUST_BACKTRACE")
+            .map(|x| &x != "0")
+            .unwrap_or(false);
         Self {
             logger,
-            depth,
+            backtrace,
             with,
         }
     }
@@ -38,6 +43,21 @@ where
     fn with(&self) -> (u64, Option<u64>) {
         (self.with)()
     }
+
+    /// Compute which stack frame to log based on an offset defined inside the log message.
+    /// This message is then stripped from the resulting record.
+    fn compute_stack_depth(&self, _record: &Record<'_>) -> u8 {
+        let base_depth = 4;
+        base_depth
+    }
+}
+
+/// Get the thread id. Useful because ThreadId doesn't implement Display.
+fn thread_id() -> String {
+    let mut string = format!("{:?}", thread::current().id());
+    string.replace_range(0..9, "");
+    string.pop();
+    string
 }
 
 impl<L: Log, F> log::Log for Logger<L, F>
@@ -51,28 +71,34 @@ where
     fn log(&self, record: &Record<'_>) {
         if self.enabled(record.metadata()) {
             let (curr_id, parent_id) = self.with();
-            let symbol = async_log_capture_caller(self.depth);
+            let depth = self.compute_stack_depth(&record);
+            let symbol = async_log_capture_caller(depth);
 
+            let thread_id = format!(", thread_id={}", thread_id());
             let task_id = format!(", task_id={}", curr_id);
             let parent_id = parent_id
                 .map(|pid| format!(", task_parent_id={}", pid))
                 .unwrap_or_else(|| String::from(""));
 
-            let (line, filename) = match symbol {
-                Some(symbol) => {
-                    let line = symbol
-                        .lineno
-                        .map(|l| format!(", line={}", l))
-                        .unwrap_or_else(|| String::from(""));
+            let (line, filename) = if self.backtrace {
+                match symbol {
+                    Some(symbol) => {
+                        let line = symbol
+                            .lineno
+                            .map(|l| format!(", line={}", l))
+                            .unwrap_or_else(|| String::from(""));
 
-                    let filename = symbol
-                        .filename
-                        .map(|f| format!(", filename={}", f.to_string_lossy()))
-                        .unwrap_or_else(|| String::from(""));
+                        let filename = symbol
+                            .filename
+                            .map(|f| format!(", filename={}", f.to_string_lossy()))
+                            .unwrap_or_else(|| String::from(""));
 
-                    (line, filename)
+                        (line, filename)
+                    }
+                    None => (String::from(""), String::from("")),
                 }
-                None => (String::from(""), String::from("")),
+            } else {
+                (String::from(""), String::from(""))
             };
 
             // This is done this way b/c `Record` + `format_args` needs to be built inline. See:
@@ -81,12 +107,13 @@ where
                 &log::Record::builder()
                     .args(record.args().clone())
                     .args(format_args!(
-                        "{}{}{}{}{}",
+                        "{}{}{}{}{}{}",
                         record.args(),
                         filename,
                         line,
                         task_id,
-                        parent_id
+                        parent_id,
+                        thread_id
                     ))
                     .metadata(record.metadata().clone())
                     .level(record.level())

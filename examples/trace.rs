@@ -6,8 +6,7 @@ fn setup_logger() {
         .filter(None, log::LevelFilter::Trace)
         .build();
 
-    let depth = 4;
-    async_log::Logger::wrap(logger, depth, || (12, Some(13)))
+    async_log::Logger::wrap(logger, || (12, Some(13)))
         .start(log::LevelFilter::Trace)
         .unwrap();
 }
