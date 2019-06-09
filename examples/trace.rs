@@ -2,9 +2,13 @@ use async_log::span;
 use log::info;
 
 fn setup_logger() {
-    env_logger::Builder::new()
-        .filter(None, log::Level::Trace.to_level_filter())
-        .try_init()
+    let logger = env_logger::Builder::new()
+        .filter(None, log::LevelFilter::Trace)
+        .build();
+
+    let depth = 4;
+    async_log::Logger::wrap(logger, depth, || (12, Some(13)))
+        .start(log::LevelFilter::Trace)
         .unwrap();
 }
 

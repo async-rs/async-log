@@ -10,7 +10,6 @@ where
     logger: L,
     with: F,
     depth: u8,
-    filter: LevelFilter,
 }
 
 impl<L: Log + 'static, F> Logger<L, F>
@@ -20,22 +19,19 @@ where
     /// Wrap an existing logger, extending it with async functionality.
     pub fn wrap(logger: L, depth: u8, with: F) -> Self {
         Self {
-            filter: LevelFilter::Off,
             logger,
             depth,
             with,
         }
     }
 
-    /// Set the filter level
-    pub fn filter(mut self, filter: LevelFilter) -> Self {
-        self.filter = filter;
-        self
-    }
-
     /// Start logging.
-    pub fn start(self) -> Result<(), log::SetLoggerError> {
-        log::set_boxed_logger(Box::new(self))
+    pub fn start(self, filter: LevelFilter) -> Result<(), log::SetLoggerError> {
+        let res = log::set_boxed_logger(Box::new(self));
+        if res.is_ok() {
+            log::set_max_level(filter);
+        }
+        res
     }
 
     /// Call the `self.with` closure, and return its results.
@@ -57,9 +53,9 @@ where
             let (curr_id, parent_id) = self.with();
             let symbol = async_log_capture_caller(self.depth);
 
-            let task_id = format!("task_id={}", curr_id);
+            let task_id = format!(", task_id={}", curr_id);
             let parent_id = parent_id
-                .map(|pid| format!("task_parent_id={}", pid))
+                .map(|pid| format!(", task_parent_id={}", pid))
                 .unwrap_or_else(|| String::from(""));
 
             let (line, filename) = match symbol {
@@ -87,8 +83,8 @@ where
                     .args(format_args!(
                         "{}{}{}{}{}",
                         record.args(),
-                        line,
                         filename,
+                        line,
                         task_id,
                         parent_id
                     ))

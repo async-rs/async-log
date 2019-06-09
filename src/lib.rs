@@ -78,7 +78,7 @@
 //!
 //! fn setup_logger() {
 //!     env_logger::Builder::new()
-//!         .filter(None, log::Level::Trace.to_level_filter())
+//!         .filter(None, log::LevelFilter::Trace)
 //!         .try_init()
 //!         .unwrap();
 //! }
@@ -90,7 +90,7 @@
 //!         let x = "foo";
 //!         info!("this {}", x);
 //!
-//!         span!("inner", "x={}", x, {
+//!         span!("inner, x={}", x, {
 //!             info!("we must go deeper {}", x);
 //!         });
 //!     })
