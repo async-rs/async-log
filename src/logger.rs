@@ -7,7 +7,7 @@ use std::thread;
 #[derive(Debug)]
 pub struct Logger<L: Log + 'static, F>
 where
-    F: Fn() -> (u64, Option<u64>) + Send + Sync + 'static,
+    F: Fn() -> u64 + Send + Sync + 'static,
 {
     backtrace: bool,
     logger: L,
@@ -16,7 +16,7 @@ where
 
 impl<L: Log + 'static, F> Logger<L, F>
 where
-    F: Fn() -> (u64, Option<u64>) + Send + Sync + 'static,
+    F: Fn() -> u64 + Send + Sync + 'static,
 {
     /// Wrap an existing logger, extending it with async functionality.
     pub fn wrap(logger: L, with: F) -> Self {
@@ -40,7 +40,7 @@ where
     }
 
     /// Call the `self.with` closure, and return its results.
-    fn with(&self) -> (u64, Option<u64>) {
+    fn with(&self) -> u64 {
         (self.with)()
     }
 
@@ -62,7 +62,7 @@ fn thread_id() -> String {
 
 impl<L: Log, F> log::Log for Logger<L, F>
 where
-    F: Fn() -> (u64, Option<u64>) + Send + Sync + 'static,
+    F: Fn() -> u64 + Send + Sync + 'static,
 {
     fn enabled(&self, metadata: &Metadata<'_>) -> bool {
         self.logger.enabled(metadata)
@@ -70,15 +70,12 @@ where
 
     fn log(&self, record: &Record<'_>) {
         if self.enabled(record.metadata()) {
-            let (curr_id, parent_id) = self.with();
+            let curr_id = self.with();
             let depth = self.compute_stack_depth(&record);
             let symbol = async_log_capture_caller(depth);
 
             let thread_id = format!(", thread_id={}", thread_id());
             let task_id = format!(", task_id={}", curr_id);
-            let parent_id = parent_id
-                .map(|pid| format!(", task_parent_id={}", pid))
-                .unwrap_or_else(|| String::from(""));
 
             let (line, filename) = if self.backtrace {
                 match symbol {
@@ -107,12 +104,11 @@ where
                 &log::Record::builder()
                     .args(record.args().clone())
                     .args(format_args!(
-                        "{}{}{}{}{}{}",
+                        "{}{}{}{}{}",
                         record.args(),
                         filename,
                         line,
                         task_id,
-                        parent_id,
                         thread_id
                     ))
                     .metadata(record.metadata().clone())

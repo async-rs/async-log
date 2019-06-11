@@ -77,9 +77,12 @@
 //! use log::info;
 //!
 //! fn setup_logger() {
-//!     env_logger::Builder::new()
+//!     let logger = env_logger::Builder::new()
 //!         .filter(None, log::LevelFilter::Trace)
-//!         .try_init()
+//!         .build();
+//!
+//!     async_log::Logger::wrap(logger, || (12, Some(13)))
+//!         .start(log::LevelFilter::Trace)
 //!         .unwrap();
 //! }
 //!

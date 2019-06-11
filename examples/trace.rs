@@ -6,7 +6,7 @@ fn setup_logger() {
         .filter(None, log::LevelFilter::Trace)
         .build();
 
-    async_log::Logger::wrap(logger, || (12, Some(13)))
+    async_log::Logger::wrap(logger, || 12)
         .start(log::LevelFilter::Trace)
         .unwrap();
 }
@@ -20,6 +20,6 @@ fn main() {
 
         span!("inner, x={}", x, {
             info!("we must go deeper {}", x);
-        });
+        })
     })
 }
