@@ -1,7 +1,7 @@
 [package]
 name = "async-log-attributes"
 description = "Proc Macro attributes for the async-log crate."
-version = "1.0.0"
+version = "1.0.1"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/rustasync/runtime"

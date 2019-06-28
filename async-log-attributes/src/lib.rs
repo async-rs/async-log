@@ -1,9 +1,7 @@
-//! Proc Macro attributes for the [Runtime](https://github.com/rustasync/runtime) crate. See the
-//! [Runtime](https://docs.rs/runtime) documentation for more details.
+//! Proc Macro attributes for the `async-log` crate.
 
 #![forbid(unsafe_code, future_incompatible, rust_2018_idioms)]
 #![deny(missing_debug_implementations, nonstandard_style)]
-#![feature(async_await)]
 #![recursion_limit = "512"]
 
 extern crate proc_macro;
