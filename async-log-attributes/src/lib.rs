@@ -9,16 +9,7 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::quote;
 
-/// Defines the async main function.
-///
-/// # Examples
-///
-/// ```ignore
-/// #[span]
-/// async fn main() -> std::io::Result<()> {
-///     Ok(())
-/// }
-/// ```
+/// Defines the `instrument` function.
 #[proc_macro_attribute]
 pub fn instrument(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(item as syn::ItemFn);
