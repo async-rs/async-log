@@ -111,7 +111,7 @@
 #![warn(missing_docs, missing_doc_code_examples, unreachable_pub)]
 #![cfg_attr(test, deny(warnings))]
 
-pub use async_log_attributes::span_wrap;
+pub use async_log_attributes::instrument;
 
 mod backtrace;
 mod logger;

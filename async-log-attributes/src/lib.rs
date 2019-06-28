@@ -22,7 +22,7 @@ use quote::quote;
 /// }
 /// ```
 #[proc_macro_attribute]
-pub fn span_wrap(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn instrument(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(item as syn::ItemFn);
 
     let attrs = &input.attrs;

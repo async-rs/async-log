@@ -24,7 +24,7 @@ fn main() {
     })
 }
 
-#[async_log::span_wrap]
+#[async_log::instrument]
 fn inner(y: &str) {
     info!("another nice value, y={}", y);
 }
