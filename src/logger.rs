@@ -1,5 +1,5 @@
 use crate::backtrace::async_log_capture_caller;
-use log::{LevelFilter, Log, Metadata, Record};
+use log::{LevelFilter, Log, Metadata, Record, set_boxed_logger};
 
 use std::thread;
 
@@ -32,7 +32,7 @@ where
 
     /// Start logging.
     pub fn start(self, filter: LevelFilter) -> Result<(), log::SetLoggerError> {
-        let res = log::set_boxed_logger(Box::new(self));
+        let res = set_boxed_logger(Box::new(self));
         if res.is_ok() {
             log::set_max_level(filter);
         }
@@ -77,7 +77,7 @@ where
             let thread_id = format!(", thread_id={}", thread_id());
             let task_id = format!(", task_id={}", curr_id);
 
-            let (line, filename) = if self.backtrace {
+            let (line, filename, fn_name) = if self.backtrace {
                 match symbol {
                     Some(symbol) => {
                         let line = symbol
@@ -90,24 +90,29 @@ where
                             .map(|f| format!(", filename={}", f.to_string_lossy()))
                             .unwrap_or_else(|| String::from(""));
 
-                        (line, filename)
+                        let fn_name = symbol
+                            .name
+                            .map(|l| format!(", fn_name={}", l))
+                            .unwrap_or_else(|| String::from(""));
+
+                        (line, filename, fn_name)
                     }
-                    None => (String::from(""), String::from("")),
+                    None => (String::from(""), String::from(""), String::from("")),
                 }
             } else {
-                (String::from(""), String::from(""))
+                (String::from(""), String::from(""), String::from(""))
             };
 
             // This is done this way b/c `Record` + `format_args` needs to be built inline. See:
             // https://stackoverflow.com/q/56304313/1541707
             self.logger.log(
                 &log::Record::builder()
-                    .args(record.args().clone())
                     .args(format_args!(
-                        "{}{}{}{}{}",
+                        "{}{}{}{}{}{}",
                         record.args(),
                         filename,
                         line,
+                        fn_name,
                         task_id,
                         thread_id
                     ))

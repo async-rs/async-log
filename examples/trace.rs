@@ -6,7 +6,7 @@ fn setup_logger() {
         .filter(None, log::LevelFilter::Trace)
         .build();
 
-    async_log::Logger::wrap(logger, || 12)
+    async_log::Logger::wrap(logger, || /* get the task id here */ 0)
         .start(log::LevelFilter::Trace)
         .unwrap();
 }
@@ -14,12 +14,17 @@ fn setup_logger() {
 fn main() {
     setup_logger();
 
-    span!("main", {
-        let x = "foo";
-        info!("this {}", x);
+    span!("new level, depth={}", 1, {
+        let x = "beep";
+        info!("look at this value, x={}", x);
 
-        span!("inner, x={}", x, {
-            info!("we must go deeper {}", x);
+        span!("new level, depth={}", 2, {
+            inner("boop");
         })
     })
+}
+
+#[async_log::span_wrap]
+fn inner(y: &str) {
+    info!("another nice value, y={}", y);
 }

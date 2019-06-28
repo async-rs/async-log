@@ -2,7 +2,9 @@
 [![crates.io version][1]][2] [![build status][3]][4]
 [![downloads][5]][6] [![docs.rs docs][7]][8]
 
-Async tracing capabilities for the log crate.
+Async tracing capabilities for the standard [`log`] crate.
+
+[`log`]: https://docs.rs/log
 
 - [Documentation][8]
 - [Crates.io][2]
@@ -11,7 +13,32 @@ Async tracing capabilities for the log crate.
 ## Examples
 __Basic usage__
 ```rust
-// tbi
+use async_log::span;
+use log::info;
+
+fn setup_logger() {
+    let logger = env_logger::Builder::new()
+        .filter(None, log::LevelFilter::Trace)
+        .build();
+
+    async_log::Logger::wrap(logger, || 12)
+        .start(log::LevelFilter::Trace)
+        .unwrap();
+}
+
+fn main() {
+    setup_logger();
+
+    span!("level I", {
+        let x = "beep";
+        info!("look at this value, x={}", x);
+
+        span!("level II", {
+            let y = "boop";
+            info!("another nice value, y={}", y);
+        })
+    })
+}
 ```
 
 ## Installation

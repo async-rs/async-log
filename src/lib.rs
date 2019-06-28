@@ -1,4 +1,4 @@
-//! Async tracing capabilities for [`log`].
+//! Async tracing capabilities for the standard [`log`] crate.
 //!
 //! [`log`]: https://docs.rs/log
 //!
@@ -51,9 +51,14 @@
 //!
 //! __example__
 //! ```txt
-//! runtime::fs::read_to_string, span_mark=start, path=/tmp/foob, task_id=7, parent_id=5, thread_id=8
-//! runtime::fs::read_to_string, span_mark=end, path=/tmp/foob, task_id=7, parent_id=5, thread_id=8
+//! runtime::fs::read_to_string, span_mark=start, path=/tmp/foob, task_id=7, thread_id=8
+//! runtime::fs::read_to_string, span_mark=end, path=/tmp/foob, task_id=7, thread_id=8
 //! ```
+//!
+//! ## Why build on the log crate?
+//! [`log`](https://docs.rs/log/) is Rust's standard log crate. It's incredibly flexible, and was
+//! built with extensibility in mind. Because it's so widely used, being able to extend it allows
+//! us to add tracing data to crates without needing to make any changes to their `log!` calls.
 //!
 //! ## Formatting
 //! Structured logging (key-value logging) is [currently in the
@@ -81,7 +86,7 @@
 //!         .filter(None, log::LevelFilter::Trace)
 //!         .build();
 //!
-//!     async_log::Logger::wrap(logger, || (12, Some(13)))
+//!     async_log::Logger::wrap(logger, || 12)
 //!         .start(log::LevelFilter::Trace)
 //!         .unwrap();
 //! }
@@ -89,13 +94,14 @@
 //! fn main() {
 //!     setup_logger();
 //!
-//!     span!("main", {
-//!         let x = "foo";
-//!         info!("this {}", x);
+//!     span!("new level, depth={}", 1, {
+//!         let x = "beep";
+//!         info!("look at this value, x={}", x);
 //!
-//!         span!("inner, x={}", x, {
-//!             info!("we must go deeper {}", x);
-//!         });
+//!         span!("new level, depth={}", 2, {
+//!             let y = "boop";
+//!             info!("another nice value, y={}", y);
+//!         })
 //!     })
 //! }
 //! ```
@@ -104,6 +110,8 @@
 #![deny(missing_debug_implementations, nonstandard_style)]
 #![warn(missing_docs, missing_doc_code_examples, unreachable_pub)]
 #![cfg_attr(test, deny(warnings))]
+
+pub use async_log_attributes::span_wrap;
 
 mod backtrace;
 mod logger;

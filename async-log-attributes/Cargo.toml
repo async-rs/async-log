@@ -1,0 +1,21 @@
+[package]
+name = "async-log-attributes"
+description = "Proc Macro attributes for the async-log crate."
+version = "0.3.0-alpha.4"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/rustasync/runtime"
+homepage = "https://github.com/rustasync/runtime"
+documentation = "https://docs.rs/runtime-attributes"
+authors = ["The Rust Async Ecosystem Working Group"]
+keywords = ["async", "log", "trace", "span", "macro"]
+categories = ["asynchronous", "command-line-utilities", "development-tools", "text-processing", "web-programming"]
+edition = "2018"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "0.15.33", features = ["full"] }
+proc-macro2 = { version = "0.4.29", features = ["nightly"] }
+quote = "0.6.12"
