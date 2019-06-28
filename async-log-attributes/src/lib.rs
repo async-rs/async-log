@@ -21,7 +21,6 @@ use quote::quote;
 ///     Ok(())
 /// }
 /// ```
-#[cfg(not(test))] // NOTE: exporting main breaks tests, we should file an issue.
 #[proc_macro_attribute]
 pub fn span_wrap(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(item as syn::ItemFn);
@@ -50,17 +49,10 @@ pub fn span_wrap(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let names: String = args
         .iter()
         .enumerate()
-        .map(|(i, _arg)| match i {
-            0 => {
-                let mut string = format!("arg_{}", 0);
-                string.push_str("={}");
-                string
-            }
-            n => {
-                let mut string = format!(", arg_{}", n);
-                string.push_str("={}");
-                string
-            }
+        .map(|(i, _arg)| {
+            let mut string = format!(", arg_{}", i);
+            string.push_str("={}");
+            string
         })
         .collect();
 
@@ -68,7 +60,7 @@ pub fn span_wrap(_attr: TokenStream, item: TokenStream) -> TokenStream {
         #(#attrs)*
         #vis #constness #unsafety #asyncness #abi fn #generics #name(#(#inputs)*) #output {
             let __name = format!("{}#{}", file!(), stringify!(#name));
-            let __args = format!("{} {}", __name, format_args!(#names, #(#args)*));
+            let __args = format!("{}{}", __name, format_args!(#names, #(#args)*));
             async_log::span!(__args, {
                 #(#body)*
             })

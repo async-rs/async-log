@@ -10,6 +10,7 @@ pub(crate) struct Symbol {
 ///
 /// `depth` is how many frames we should look past finding the method where this was called.
 /// This might require a bit of wrangling to find.
+#[allow(unused_attributes)]
 #[no_mangle]
 pub(crate) fn async_log_capture_caller(depth: u8) -> Option<Symbol> {
     let mut count = 0;
