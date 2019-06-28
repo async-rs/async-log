@@ -84,7 +84,6 @@ a new cat has logged on, name=nori, snacks=always
 ```
 
 ## Examples
-__Basic usage__
 ```rust
 use async_log::span;
 use log::info;
