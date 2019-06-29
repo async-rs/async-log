@@ -39,15 +39,15 @@ pub fn instrument(_attr: TokenStream, item: TokenStream) -> TokenStream {
         .iter()
         .enumerate()
         .map(|(i, _arg)| {
-            let mut string = format!(", arg_{}", i);
-            string.push_str("={}");
+            let mut string = format!(", arg_{:?}", i);
+            string.push_str("={:?}");
             string
         })
         .collect();
 
     let result = quote! {
         #(#attrs)*
-        #vis #constness #unsafety #asyncness #abi fn #generics #name(#(#inputs)*) #output {
+        #vis #constness #unsafety #asyncness #abi fn #name #generics (#(#inputs)*) #output {
             let __name = format!("{}#{}", file!(), stringify!(#name));
             let __args = format!("{}{}", __name, format_args!(#names, #(#args)*));
             async_log::span!(__args, {
