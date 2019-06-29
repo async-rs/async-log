@@ -1,3 +1,19 @@
+## 2019-06-29, Version 1.0.3
+### Commits
+- [[`cd3b2e601e`](https://github.com/rustasync/async-log/commit/cd3b2e601e1e5d4c65bb8e55faa2fb51de165ab9)] (cargo-release) version 1.0.3 (Yoshua Wuyts)
+- [[`6523ce359d`](https://github.com/rustasync/async-log/commit/6523ce359d2358e0315ed8234614fd9f54546f30)] enable feature (Yoshua Wuyts)
+- [[`2fd679c21a`](https://github.com/rustasync/async-log/commit/2fd679c21a35a639e3ec245cb5c8b3591b3aa5d1)] fmt (Yoshua Wuyts)
+- [[`0f5960c436`](https://github.com/rustasync/async-log/commit/0f5960c4365b82b080eae356818f71772b8e20e7)] Update changelog (Yoshua Wuyts)
+
+### Stats
+```diff
+ CHANGELOG.md  | 57 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ Cargo.toml    |  4 ++--
+ src/logger.rs |  2 +-
+ 3 files changed, 60 insertions(+), 3 deletions(-)
+```
+
+
 ## 2019-06-29, Version 1.0.2
 ### Commits
 - [[`e884e89858`](https://github.com/rustasync/async-log/commit/e884e8985827d555a4ac8281c0bc316670d182c3)] (cargo-release) version 1.0.2 (Yoshua Wuyts)
