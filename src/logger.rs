@@ -1,5 +1,5 @@
 use crate::backtrace::async_log_capture_caller;
-use log::{LevelFilter, Log, Metadata, Record, set_boxed_logger};
+use log::{set_boxed_logger, LevelFilter, Log, Metadata, Record};
 
 use std::thread;
 
