@@ -1,3 +1,18 @@
+## 2019-06-29, Version 1.0.4
+### Commits
+- [[`ff66e76568`](https://github.com/rustasync/async-log/commit/ff66e7656818fc6ffc1be772eb5db255294831d4)] (cargo-release) version 1.0.4 (Yoshua Wuyts)
+- [[`b014d175c9`](https://github.com/rustasync/async-log/commit/b014d175c99b7e1cd7de3945fc746760b4193b8e)] fix generics ordering (Yoshua Wuyts)
+- [[`ab084f46f7`](https://github.com/rustasync/async-log/commit/ab084f46f7704b07b700fd50be1873e3f1b17628)] Update changelog (Yoshua Wuyts)
+
+### Stats
+```diff
+ CHANGELOG.md                    | 16 ++++++++++++++++
+ Cargo.toml                      |  2 +-
+ async-log-attributes/src/lib.rs |  6 +++---
+ 3 files changed, 20 insertions(+), 4 deletions(-)
+```
+
+
 ## 2019-06-29, Version 1.0.3
 ### Commits
 - [[`cd3b2e601e`](https://github.com/rustasync/async-log/commit/cd3b2e601e1e5d4c65bb8e55faa2fb51de165ab9)] (cargo-release) version 1.0.3 (Yoshua Wuyts)
