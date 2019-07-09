@@ -1,4 +1,4 @@
-use async_log::span;
+use async_log::{instrument, span};
 use log::info;
 
 fn setup_logger() {
@@ -24,7 +24,7 @@ fn main() {
     })
 }
 
-#[async_log::instrument]
+#[instrument]
 fn inner(y: &str) {
     info!("another nice value, y={}", y);
 }

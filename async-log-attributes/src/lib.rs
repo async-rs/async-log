@@ -7,7 +7,8 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
-use quote::quote;
+use quote::{quote, quote_spanned};
+use syn::spanned::Spanned;
 
 /// Defines the `instrument` function.
 #[proc_macro_attribute]
@@ -27,23 +28,25 @@ pub fn instrument(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let output = &input.decl.output;
     let body = &input.block.stmts;
 
-    let args: Vec<syn::Pat> = inputs
-        .pairs()
-        .filter_map(|pair| match pair.into_value() {
-            syn::FnArg::Captured(arg) => Some(arg.pat.clone()),
-            _ => return None,
-        })
-        .collect();
+    let mut names = String::new();
+    let mut args = Vec::<syn::Pat>::new();
 
-    let names: String = args
-        .iter()
-        .enumerate()
-        .map(|(i, _arg)| {
-            let mut string = format!(", arg_{:?}", i);
-            string.push_str("={:?}");
-            string
-        })
-        .collect();
+    for fn_arg in inputs {
+        if let syn::FnArg::Captured(arg) = fn_arg {
+            let pat = arg.pat.clone();
+
+            if let syn::Pat::Ident(pat_ident) = &pat {
+                names.push_str(&format!(", {}={{:?}}", pat_ident.ident));
+            } else {
+                let tokens = quote_spanned! { fn_arg.span() =>
+                    compile_error!("instrumented functions need to name arguments");
+                };
+                return TokenStream::from(tokens);
+            }
+
+            args.push(pat);
+        }
+    }
 
     let result = quote! {
         #(#attrs)*
