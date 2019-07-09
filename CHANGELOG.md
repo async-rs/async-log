@@ -1,3 +1,21 @@
+## 2019-07-09, Version 1.1.0
+### Commits
+- [[`b0f08bf5fd`](https://github.com/rustasync/async-log/commit/b0f08bf5fd18681643d1344992023fc44d073242)] (cargo-release) version 1.1.0 (Yoshua Wuyts)
+- [[`c3673c4edf`](https://github.com/rustasync/async-log/commit/c3673c4edfff3cf553c6754853d004cce3a7a476)] Named arguments (#1) (Stjepan Glavina)
+- [[`3f56908ae6`](https://github.com/rustasync/async-log/commit/3f56908ae609dd1ecc72a017bc6e67fc3fb4f24c)] fix clippy warnings (#2) (Yoshua Wuyts)
+- [[`99dab06054`](https://github.com/rustasync/async-log/commit/99dab0605479462a4a88844514c9792b1bad9eda)] Update changelog (Yoshua Wuyts)
+
+### Stats
+```diff
+ CHANGELOG.md                    | 15 +++++++++++++++
+ Cargo.toml                      |  2 +-
+ async-log-attributes/src/lib.rs | 39 +++++++++++++++++++++------------------
+ examples/trace.rs               |  4 ++--
+ src/logger.rs                   |  3 +--
+ 5 files changed, 40 insertions(+), 23 deletions(-)
+```
+
+
 ## 2019-06-29, Version 1.0.4
 ### Commits
 - [[`ff66e76568`](https://github.com/rustasync/async-log/commit/ff66e7656818fc6ffc1be772eb5db255294831d4)] (cargo-release) version 1.0.4 (Yoshua Wuyts)
