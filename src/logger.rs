@@ -47,8 +47,7 @@ where
     /// Compute which stack frame to log based on an offset defined inside the log message.
     /// This message is then stripped from the resulting record.
     fn compute_stack_depth(&self, _record: &Record<'_>) -> u8 {
-        let base_depth = 4;
-        base_depth
+        4
     }
 }
 
