@@ -1,6 +1,6 @@
 [package]
 name = "async-log"
-version = "1.0.4"
+version = "1.1.0"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/rustasync/async-log"
 documentation = "https://docs.rs/async-log"
