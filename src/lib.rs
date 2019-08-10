@@ -82,10 +82,7 @@
 //! use log::info;
 //!
 //! fn setup_logger() {
-//!     let logger = env_logger::Builder::new()
-//!         .filter(None, log::LevelFilter::Trace)
-//!         .build();
-//!
+//!     let logger = femme::pretty::Logger::new();
 //!     async_log::Logger::wrap(logger, || 12)
 //!         .start(log::LevelFilter::Trace)
 //!         .unwrap();
@@ -113,6 +110,8 @@
 
 pub use async_log_attributes::instrument;
 
+use std::fmt::Arguments;
+
 mod backtrace;
 mod logger;
 mod macros;
@@ -137,7 +136,18 @@ impl Span {
     /// You should generally prefer to call `span!` instead of constructing this manually.
     pub fn new(args: impl AsRef<str>) -> Self {
         let args = args.as_ref();
-        log::trace!("{}, span_mark=start", args);
+        struct KeyValues;
+        impl log::kv::Source for KeyValues {
+            fn visit<'kvs>(
+                &'kvs self,
+                visitor: &mut dyn log::kv::Visitor<'kvs>,
+            ) -> Result<(), log::kv::Error> {
+                visitor.visit_pair("span_mark".into(), "start".into())?;
+                Ok(())
+            }
+        }
+
+        print(log::Level::Trace, format_args!("{}", args), KeyValues {});
         Self {
             args: args.to_owned(),
         }
@@ -146,6 +156,37 @@ impl Span {
 
 impl Drop for Span {
     fn drop(&mut self) {
-        log::trace!("{}, span_mark=end", self.args);
+        struct KeyValues;
+        impl log::kv::Source for KeyValues {
+            fn visit<'kvs>(
+                &'kvs self,
+                visitor: &mut dyn log::kv::Visitor<'kvs>,
+            ) -> Result<(), log::kv::Error> {
+                visitor.visit_pair("span_mark".into(), "end".into())?;
+                Ok(())
+            }
+        }
+
+        print(
+            log::Level::Trace,
+            format_args!("{}", self.args),
+            KeyValues {},
+        );
+    }
+}
+
+fn print(level: log::Level, msg: Arguments<'_>, key_values: impl log::kv::Source) {
+    if level <= log::STATIC_MAX_LEVEL && level <= log::max_level() {
+        log::logger().log(
+            &log::Record::builder()
+                .args(msg)
+                .key_values(&key_values)
+                .level(level)
+                .target(module_path!())
+                .module_path(Some(module_path!()))
+                .file(Some(file!()))
+                .line(Some(line!()))
+                .build(),
+        );
     }
 }

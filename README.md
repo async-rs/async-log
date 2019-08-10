@@ -89,10 +89,7 @@ use async_log::span;
 use log::info;
 
 fn setup_logger() {
-    let logger = env_logger::Builder::new()
-        .filter(None, log::LevelFilter::Trace)
-        .build();
-
+    let logger = femme::pretty::Logger::new();
     async_log::Logger::wrap(logger, || 12)
         .start(log::LevelFilter::Trace)
         .unwrap();

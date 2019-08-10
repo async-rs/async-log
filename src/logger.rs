@@ -52,11 +52,11 @@ where
 }
 
 /// Get the thread id. Useful because ThreadId doesn't implement Display.
-fn thread_id() -> String {
+fn thread_id() -> u64 {
     let mut string = format!("{:?}", thread::current().id());
     string.replace_range(0..9, "");
     string.pop();
-    string
+    string.parse().unwrap()
 }
 
 impl<L: Log, F> log::Log for Logger<L, F>
@@ -69,12 +69,14 @@ where
 
     fn log(&self, record: &Record<'_>) {
         if self.enabled(record.metadata()) {
-            let curr_id = self.with();
             let depth = self.compute_stack_depth(&record);
             let symbol = async_log_capture_caller(depth);
 
-            let thread_id = format!(", thread_id={}", thread_id());
-            let task_id = format!(", task_id={}", curr_id);
+            let key_values = KeyValues {
+                thread_id: thread_id(),
+                task_id: self.with(),
+                kvs: record.key_values(),
+            };
 
             let (line, filename, fn_name) = if self.backtrace {
                 match symbol {
@@ -107,15 +109,14 @@ where
             self.logger.log(
                 &log::Record::builder()
                     .args(format_args!(
-                        "{}{}{}{}{}{}",
+                        "{}{}{}{}",
                         record.args(),
                         filename,
                         line,
                         fn_name,
-                        task_id,
-                        thread_id
                     ))
                     .metadata(record.metadata().clone())
+                    .key_values(&key_values)
                     .level(record.level())
                     .target(record.target())
                     .module_path(record.module_path())
@@ -126,4 +127,21 @@ where
         }
     }
     fn flush(&self) {}
+}
+
+struct KeyValues<'a> {
+    thread_id: u64,
+    task_id: u64,
+    kvs: &'a dyn log::kv::Source,
+}
+impl<'a> log::kv::Source for KeyValues<'a> {
+    fn visit<'kvs>(
+        &'kvs self,
+        visitor: &mut dyn log::kv::Visitor<'kvs>,
+    ) -> Result<(), log::kv::Error> {
+        self.kvs.visit(visitor)?;
+        visitor.visit_pair("thread_id".into(), self.thread_id.into())?;
+        visitor.visit_pair("task_id".into(), self.task_id.into())?;
+        Ok(())
+    }
 }

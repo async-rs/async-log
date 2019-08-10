@@ -12,12 +12,12 @@ readme = "README.md"
 edition = "2018"
 
 [dependencies]
-log = { version = "0.4.6", features = ["std"] }
-backtrace = "0.3.32"
+log = { version = "0.4.8", features = ["std", "kv_unstable"] }
+backtrace = "0.3.34"
 async-log-attributes = { path = "async-log-attributes", version = "1.0.1" }
 
 [dev-dependencies]
-env_logger = "0.6.1"
+femme = "1.2.0"
 
 [workspace]
 members = [
