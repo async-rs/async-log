@@ -1,3 +1,21 @@
+## 2019-08-10, Version 2.0.0
+### Commits
+- [[`1392e471de`](https://github.com/rustasync/async-log/commit/1392e471de555c36c4bb37e80b7e7bacd26b45b3)] (cargo-release) version 2.0.0 (Yoshua Wuyts)
+- [[`ac19dddb27`](https://github.com/rustasync/async-log/commit/ac19dddb27a4624edb6eed49adf3ad4f9473d988)] add kv-logging to async-log (#5) (Yoshua Wuyts)
+- [[`655203077e`](https://github.com/rustasync/async-log/commit/655203077e00b960063c567032d0346cdbb4276a)] Update changelog (Yoshua Wuyts)
+
+### Stats
+```diff
+ CHANGELOG.md      | 18 ++++++++++++++++++
+ Cargo.toml        |  8 ++++----
+ README.md         |  5 +----
+ examples/trace.rs | 13 +++++--------
+ src/lib.rs        | 53 +++++++++++++++++++++++++++++++++++++++++++++++------
+ src/logger.rs     | 34 ++++++++++++++++++++++++++--------
+ 6 files changed, 101 insertions(+), 30 deletions(-)
+```
+
+
 ## 2019-07-09, Version 1.1.0
 ### Commits
 - [[`b0f08bf5fd`](https://github.com/rustasync/async-log/commit/b0f08bf5fd18681643d1344992023fc44d073242)] (cargo-release) version 1.1.0 (Yoshua Wuyts)
