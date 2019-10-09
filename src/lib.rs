@@ -78,26 +78,27 @@
 //! ## Example
 //!
 //! ```rust
-//! use async_log::span;
-//! use log::info;
+//! use async_std::task;
 //!
 //! fn setup_logger() {
 //!     let logger = femme::pretty::Logger::new();
-//!     async_log::Logger::wrap(logger, || 12)
+//!     async_log::Logger::wrap(logger)
 //!         .start(log::LevelFilter::Trace)
 //!         .unwrap();
 //! }
 //!
 //! fn main() {
-//!     setup_logger();
+//!     task::block_on(async {
+//!         setup_logger();
 //!
-//!     span!("new level, depth={}", 1, {
-//!         let x = "beep";
-//!         info!("look at this value, x={}", x);
+//!         async_log::span!("new level, depth={}", 1, {
+//!             let x = "beep";
+//!             log::info!("look at this value, x={}", x);
 //!
-//!         span!("new level, depth={}", 2, {
-//!             let y = "boop";
-//!             info!("another nice value, y={}", y);
+//!             async_log::span!("new level, depth={}", 2, {
+//!                 let y = "boop";
+//!                 log::info!("another nice value, y={}", y);
+//!             })
 //!         })
 //!     })
 //! }

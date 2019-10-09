@@ -1,33 +1,23 @@
 use crate::backtrace::async_log_capture_caller;
-use log::{set_boxed_logger, LevelFilter, Log, Metadata, Record};
+use log::{kv, set_boxed_logger, LevelFilter, Log, Metadata, Record};
 
+use async_std::task;
 use std::thread;
 
 /// A Logger that wraps other loggers to extend it with async functionality.
 #[derive(Debug)]
-pub struct Logger<L: Log + 'static, F>
-where
-    F: Fn() -> u64 + Send + Sync + 'static,
-{
+pub struct Logger<L: Log + 'static> {
     backtrace: bool,
     logger: L,
-    with: F,
 }
 
-impl<L: Log + 'static, F> Logger<L, F>
-where
-    F: Fn() -> u64 + Send + Sync + 'static,
-{
+impl<L: Log + 'static> Logger<L> {
     /// Wrap an existing logger, extending it with async functionality.
-    pub fn wrap(logger: L, with: F) -> Self {
+    pub fn wrap(logger: L) -> Self {
         let backtrace = std::env::var_os("RUST_BACKTRACE")
             .map(|x| &x != "0")
             .unwrap_or(false);
-        Self {
-            logger,
-            backtrace,
-            with,
-        }
+        Self { logger, backtrace }
     }
 
     /// Start logging.
@@ -37,11 +27,6 @@ where
             log::set_max_level(filter);
         }
         res
-    }
-
-    /// Call the `self.with` closure, and return its results.
-    fn with(&self) -> u64 {
-        (self.with)()
     }
 
     /// Compute which stack frame to log based on an offset defined inside the log message.
@@ -59,10 +44,7 @@ fn thread_id() -> u64 {
     string.parse().unwrap()
 }
 
-impl<L: Log, F> log::Log for Logger<L, F>
-where
-    F: Fn() -> u64 + Send + Sync + 'static,
-{
+impl<L: Log> log::Log for Logger<L> {
     fn enabled(&self, metadata: &Metadata<'_>) -> bool {
         self.logger.enabled(metadata)
     }
@@ -74,7 +56,7 @@ where
 
             let key_values = KeyValues {
                 thread_id: thread_id(),
-                task_id: self.with(),
+                task_id: task::current().id(),
                 kvs: record.key_values(),
             };
 
@@ -131,7 +113,7 @@ where
 
 struct KeyValues<'a> {
     thread_id: u64,
-    task_id: u64,
+    task_id: task::TaskId,
     kvs: &'a dyn log::kv::Source,
 }
 impl<'a> log::kv::Source for KeyValues<'a> {
@@ -140,8 +122,9 @@ impl<'a> log::kv::Source for KeyValues<'a> {
         visitor: &mut dyn log::kv::Visitor<'kvs>,
     ) -> Result<(), log::kv::Error> {
         self.kvs.visit(visitor)?;
+        let task_id = kv::Value::from_display(&self.task_id);
         visitor.visit_pair("thread_id".into(), self.thread_id.into())?;
-        visitor.visit_pair("task_id".into(), self.task_id.into())?;
+        visitor.visit_pair("task_id".into(), task_id)?;
         Ok(())
     }
 }
